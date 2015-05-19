@@ -11,7 +11,7 @@
   </style>
 </head>
 <body>
-  <div id="worldmap" height="800px" width="600px"></div>
+  <div id="worldmap"></div>
   <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
   <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
   <script src="http://d3js.org/topojson.v1.min.js"></script>
@@ -34,11 +34,11 @@
   // create a map object
   var map = L.map('worldmap')
 
-  map.setView([0,0], 3);
+  map.setView([-41,175], 6);
 
   var topoLayer = new L.TopoJSON();
 
-  $.getJSON('/DHB2012-S1.json')
+  $.getJSON('http://david14142.github.io/DHB2012-S1.json')
     .done(addTopoData);
 
   function addTopoData(topoData){
