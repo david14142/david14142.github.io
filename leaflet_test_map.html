@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>maps with leaflet & topojson</title>
+  <title>District Health Boards</title>
   <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
   <style>
     html,body,#worldmap{
@@ -15,7 +15,9 @@
   <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
   <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
   <script src="http://d3js.org/topojson.v1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/0.5.9/chroma.min.js"></script>
   <script>
+  // Snippet Copyright (c) 2013 Ryan Clark
     L.TopoJSON = L.GeoJSON.extend({
     addData: function(jsonData) {
       if (jsonData.type === "Topology") {
@@ -29,12 +31,17 @@
       }
     }
   });
-  // Copyright (c) 2013 Ryan Clark
+  </script>
+  <script>
 
   // create a map object
-  var map = L.map('worldmap')
+  var map = L.map('worldmap');
 
-  map.setView([-41,175], 6);
+  var colorScale = chroma
+      .scale(['#D5E3FF', '#003171'])
+      .domain([0,1]);
+
+  map.setView([-41,175], 6); // centred on New Zealand
 
   var topoLayer = new L.TopoJSON();
 
@@ -44,8 +51,33 @@
   function addTopoData(topoData){
     topoLayer.addData(topoData);
     topoLayer.addTo(map);
-    //topoLayer.eachLayer(handleLayer);
+    topoLayer.eachLayer(handleLayer);
+    topoLayer.setStyle({
+      //fillColor : fillColor,
+      //fillOpacity: 1,
+      color:'#555',
+      weight:1,
+      opacity:0.5
+    });
   }
+
+  function handleLayer(layer){
+    var randomValue = Math.random(),
+      fillColor = colorScale(randomValue).hex();
+
+    layer.setStyle({
+      fillColor : fillColor,
+      fillOpacity: 1
+    });
+
+    //layer.on({
+    //  mouseover : enterLayer,
+    //  mouseout: leaveLayer
+    //});
+  }
+
+
+
   </script>
 </body>
 </html>
