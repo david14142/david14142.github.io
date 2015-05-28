@@ -38,7 +38,9 @@
   var map = L.map('worldmap');
 
   var colorScale = chroma
-      .scale(['#D5E3FF', '#003171'])
+      .scale('YlGn')
+      .mode('lab')
+      .correctLightness(true)
       .domain([0,1]);
 
   map.setView([-41,175], 6); // centred on New Zealand
@@ -70,7 +72,7 @@
       fillOpacity: 1
     });
 
-    var DHBName = layer.feature.properties.NAME;
+    var DHBName = layer.feature.properties.NAME + ' DHB';
     layer.bindPopup(DHBName);
 
     layer.on({
