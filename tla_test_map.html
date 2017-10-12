@@ -27,6 +27,14 @@
       if (jsonData.type === "Topology") {
         for (key in jsonData.objects) {
           geojson = topojson.feature(jsonData, jsonData.objects[key]);
+          // Hack to make Chatham Islands cross the anti-meridian;
+          var chatham=geojson.features[57].geometry.coordinates;
+          for (let i=0; i < chatham.length; i++ ) {
+            var coast = chatham[i][0];
+            for (let j=0; j < coast.length; j++) {
+              coast[j]=coast[j]+360;
+            }
+          }
           L.GeoJSON.prototype.addData.call(this, geojson);
         }
       }
