@@ -56,7 +56,11 @@
 
   function addTopoData(topoData){
     
-    console.log(topoData);
+    var chatham = topoData.objects.tla_wgs.geometries[57];
+    for(arc=0; arc < chatham.arcs.length; arc++) {
+      console.log(360/topoData.transform.scale[0]);
+      console.log(topoData.arcs[arc]) ;
+    }
     
     topoLayer.addData(topoData);
     topoLayer.addTo(map);
