@@ -13,7 +13,7 @@
 <body>
   <div id="worldmap"></div>
   <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-  <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+  <script src="http://cdn.leafletjs.com/leaflet-1.2.0/leaflet.js"></script>
   <script src="http://d3js.org/topojson.v1.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/0.5.9/chroma.min.js"></script>
   <script>
@@ -73,7 +73,7 @@
       fillOpacity: 1
     });
 
-    var TLAName = layer.feature.properties.NAME;
+    var TLAName = layer.feature.properties.TA2015_V_1;
     layer.bindPopup(TLAName);
 
 //    layer.on({
