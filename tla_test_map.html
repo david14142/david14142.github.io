@@ -25,15 +25,8 @@
     L.TopoJSON = L.GeoJSON.extend({
     addData: function(jsonData) {
       if (jsonData.type === "Topology") {
-        for (key in jsonData.objects) {
-          geojson = topojson.feature(jsonData, jsonData.objects[key]);
-          
-          // Hack to make Chatham Islands cross the anti-meridian;
-          var chatham=geojson.features[57].geometry.coordinates[0];
-          for (let i=0; i < chatham.length; i++ ) {
-              chatham[i][0]=chatham[i][0]+360;
-          }
-          
+        for (var key in jsonData.objects) {
+          var geojson = topojson.feature(jsonData, jsonData.objects[key]);
           L.GeoJSON.prototype.addData.call(this, geojson);
         }
       }
@@ -62,6 +55,9 @@
     .done(addTopoData);
 
   function addTopoData(topoData){
+    
+    console.log(topoData);
+    
     topoLayer.addData(topoData);
     topoLayer.addTo(map);
     topoLayer.eachLayer(handleLayer);
