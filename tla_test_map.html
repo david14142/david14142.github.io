@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>District Health Boards</title>
+  <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+  <style>
+    html,body,#worldmap{
+      height:100%;
+    }
+  </style>
+</head>
+<body>
+  <div id="worldmap"></div>
+  <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+  <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+  <script src="http://d3js.org/topojson.v1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/0.5.9/chroma.min.js"></script>
+  <script>
+  // geoJSON extension Copyright (c) 2013 Ryan Clark
+    L.TopoJSON = L.GeoJSON.extend({
+    addData: function(jsonData) {
+      if (jsonData.type === "Topology") {
+        for (key in jsonData.objects) {
+          geojson = topojson.feature(jsonData, jsonData.objects[key]);
+          L.GeoJSON.prototype.addData.call(this, geojson);
+        }
+      }
+      else {
+        L.GeoJSON.prototype.addData.call(this, jsonData);
+      }
+    }
+  });
+  </script>
+  <script>
+
+  // create a map object
+  var map = L.map('worldmap');
+
+  var colorScale = chroma
+      .scale('YlGn')
+      .mode('lab')
+      .correctLightness(true)
+      .domain([0,1]);
+
+  map.setView([-41,175], 6); // centred on New Zealand
+
+  var topoLayer = new L.TopoJSON();
+
+  $.getJSON('http://david14142.github.io/tla_simple.json')
+    .done(addTopoData);
+
+  function addTopoData(topoData){
+    topoLayer.addData(topoData);
+    topoLayer.addTo(map);
+    topoLayer.eachLayer(handleLayer);
+    topoLayer.setStyle({
+      //fillColor : fillColor,
+      //fillOpacity: 1,
+      color:'#555',
+      weight:1,
+      opacity:0.5
+    });
+  }
+
+/*
+  function handleLayer(layer){
+    var randomValue = Math.random(),
+      fillColor = colorScale(randomValue).hex();
+
+    layer.setStyle({
+      fillColor : fillColor,
+      fillOpacity: 1
+    });
+
+    var DHBName = layer.feature.properties.NAME + ' DHB';
+    layer.bindPopup(DHBName);
+
+    layer.on({
+      mouseover : enterLayer,
+      mouseout: leaveLayer
+    });
+  }
+
+
+  function enterLayer(){
+//    var DHBName = this.feature.properties.NAME;
+//    console.log(DHBName);
+
+    this.bringToFront();
+    this.setStyle({
+      weight:2,
+      opacity: 1
+    });
+  }
+
+  function leaveLayer(){
+
+    this.bringToBack();
+    this.setStyle({
+      weight:1,
+      opacity:.5
+    });
+  }
+*/
+
+
+  </script>
+</body>
+</html>
