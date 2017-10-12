@@ -60,11 +60,8 @@
     var offset = 360/topoData.transform.scale[0];
 
     for(let arc=0; arc < chatham.arcs.length; arc++) {
-      
-      for(let j=0; j < topoData.arcs[chatham.arcs[arc]].length; j++) {
-        console.log(topoData.arcs[chatham.arcs[arc]][j]);
-      }
-      
+      console.log(topoData.arcs[chatham.arcs[arc]]);
+      console.log(topoData.arcs[chatham.arcs[arc]][0]);
     }
     
     topoLayer.addData(topoData);
