@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>District Health Boards</title>
+  <title>Local Authorities</title>
   <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
   <style>
     html,body,#worldmap{
@@ -47,7 +47,7 @@
 
   var topoLayer = new L.TopoJSON();
 
-  $.getJSON('http://david14142.github.io/tla-simple.json')
+  $.getJSON('http://david14142.github.io/tla.json')
     .done(addTopoData);
 
   function addTopoData(topoData){
@@ -63,7 +63,7 @@
     });
   }
 
-/*
+
   function handleLayer(layer){
     var randomValue = Math.random(),
       fillColor = colorScale(randomValue).hex();
@@ -73,15 +73,16 @@
       fillOpacity: 1
     });
 
-    var DHBName = layer.feature.properties.NAME + ' DHB';
-    layer.bindPopup(DHBName);
+    var TLAName = layer.feature.properties.NAME;
+    layer.bindPopup(TLAName);
 
-    layer.on({
-      mouseover : enterLayer,
-      mouseout: leaveLayer
-    });
+//    layer.on({
+//      mouseover : enterLayer,
+//      mouseout: leaveLayer
+//    });
   }
 
+/*
 
   function enterLayer(){
 //    var DHBName = this.feature.properties.NAME;
