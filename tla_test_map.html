@@ -47,7 +47,7 @@
 
   var topoLayer = new L.TopoJSON();
 
-  $.getJSON('http://david14142.github.io/tla_v2.json')
+  $.getJSON('http://david14142.github.io/tla_wgs84.json')
     .done(addTopoData);
 
   function addTopoData(topoData){
