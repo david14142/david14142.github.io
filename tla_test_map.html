@@ -13,7 +13,7 @@
   </style>
 </head>
 <body>
-  <div id="worldmap"></div>
+  <div id="worldmap" style='background-color: blue'></div>
   <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
   <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"
   integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log=="
@@ -56,9 +56,9 @@
 
   function addTopoData(topoData){
     
+    // hack to move Chatham islands across the anti meridian ;
     var chatham = topoData.objects.tla_wgs.geometries[57];
     var offset = 360/topoData.transform.scale[0];
-
     for(let arc=0; arc < chatham.arcs.length; arc++) {
       topoData.arcs[chatham.arcs[arc]][0][0] = topoData.arcs[chatham.arcs[arc]][0][0] + offset;
     }
@@ -77,29 +77,25 @@
 
 
   function handleLayer(layer){
-    var randomValue = Math.random(),
-      fillColor = colorScale(randomValue).hex();
+    //var randomValue = Math.random(),
+    //  fillColor = colorScale(randomValue).hex();
+    fillColor = "#fab200";
 
     layer.setStyle({
       fillColor : fillColor,
-      fillOpacity: 1
+      fillOpacity: 0.5
     });
 
     var TLAName = layer.feature.properties.TA2015_V_1;
     layer.bindPopup(TLAName);
 
-//    layer.on({
-//      mouseover : enterLayer,
-//      mouseout: leaveLayer
-//    });
+    layer.on({
+      mouseover : enterLayer,
+      mouseout: leaveLayer
+    });
   }
 
-/*
-
   function enterLayer(){
-//    var DHBName = this.feature.properties.NAME;
-//    console.log(DHBName);
-
     this.bringToFront();
     this.setStyle({
       weight:2,
@@ -115,7 +111,7 @@
       opacity:.5
     });
   }
-*/
+
 
 
   </script>
