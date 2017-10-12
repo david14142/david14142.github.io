@@ -58,12 +58,13 @@
     
     var chatham = topoData.objects.tla_wgs.geometries[57];
     var offset = 360/topoData.transform.scale[0];
-    //console.log(offset);
+
     for(let arc=0; arc < chatham.arcs.length; arc++) {
-      for(let j=0; j < topoData.arcs[arc].length; j++) {
-        //console.log(topoData.arcs[arc][j]);
-        topoData.arcs[arc][j][0] = topoData.arcs[arc][j][0]+offset;
+      
+      for(let j=0; j < topoData.arcs[chatham.arcs[arc]].length; j++) {
+        console.log(topoData.arcs[chatham.arcs[arc]][j]);
       }
+      
     }
     
     topoLayer.addData(topoData);
