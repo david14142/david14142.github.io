@@ -4,10 +4,12 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-  body {font-family: 'Helvetica', sans-serif; font-size: 16px;}
+  body {font-family: 'Helvetica', sans-serif; font-size: 16px; line-height: 1.2}
   table {font-family: 'Georgia', serif;}
   th {padding-right: 1em;}
   td {text-align: right; padding-right: 1em;}
+  code {color: blue}
+  p {max-width: 50em}
   </style>
 </head>
 <body>
@@ -75,9 +77,71 @@
   <br>
 
   <!-- use this to write to the document -->
-  <div id='anchor'></div>
+  <div id='anchor' style='overflow-x: auto'></div>
 
   <p><i>Source: Statistics New Zealand</i></p>
+
+  <h1>About</h1>
+  <p>What this isn't?  It isn't pre-calculated data, being rendered as HTML
+    tables.  Nor is it a request being sent to a server for summarised data.
+    Lastly, it isn't a custom designed summary of data.
+  <p>Instead, this uses a framework designed to summarise and cross tabulate
+    arbitrary sets of multi-variate data on the fly, inside the browser without
+    relying on SQL, or BI tools, or Excel, or in-fact anything except a text
+    file and a modern web browser.
+  <p>In just a few lines of code.
+
+  <h1>How?</h1>
+  <p>The data in this page is loaded as a simple set of arrays.  In this case,
+    the data is ten columns, each containing 3640 'rows'.  A map-reduce process
+    is used to summarise the data into groups (on demand) and the summarised data
+    is rendered as a cross-tabulation.  On a desktop you can open the browser's
+    console, and type <code>p</code> to see the <code>DataFrame</code>, or
+    <code>q</code> to see the <code>PivotTable</code>.  More technical details
+    are in the github page.
+
+  <h1>Why?</h1>
+
+  <h2>Speed</h2>
+
+  <p>Or more specifically, latency.  While it's true that complex
+    data manipulation performed by JavaScript in a browser is never going to be
+    as fast as a native solution running on a server (or even a desktop), the
+    <i>latency</i> of server solutions usually exceeds the computational and
+    rendering time spent in a browser - at least for datasets of the size you'd
+    consider loading in a browser in the first place (under, say 10MB).
+
+  <p>The idea is to faciltate interactive exploration of data with effectively
+    zero latency, even on mobile devices.
+
+  <h2>Flexibility & Maintainability</h2>
+  <p>The map-reduce framework allows a great deal of flexibility in both data
+    manipulation (using user-supplied map functions) and aggregation (again,
+    with custom reduce functions).  Likewise the callback driven tabulation
+    framework separates the specifics of table layout from the functions that
+    summarise and sort the data.  (The aim is to move beyond 2D HTML tables to
+    encompase multi-page tables, tables within tables, and other objects such
+    as charts contained in grids and tab structures).
+
+  <p>Everything on this page is easily editable in text format &ndash; the HTML,
+    the CSS, and the JavaScript, allowing customisation of everything from
+    cosmetic details, down to the underlying aggregation functions.
+
+  <h2>Portability</h2>
+  <p>This JavaScript library should be usable in any modern web browser (current
+    versions of Chrome, Edge, Firefox and Safari, running on desktop, iOS or
+    Android), without installing any desktop or server software.
+    In a pinch, data could even be embedded directly in the page script, and the
+    page saved and emailed.</p>
+
+  <h2>Cost, and scalability</h2>
+  <p>Although the tables are dynamic, the text files (HTML, JavaScript and
+    JSON/CSV) are static, and can be served from low cost servers using minimal
+    resources.  Being static, they can also be served from serverless solutions
+    (e.g. S3 pages, or as in this case GitHub pages).  The client-side approach
+    also lends itself to single page applications and progressive web apps.
+
+
 
   <script>
 
