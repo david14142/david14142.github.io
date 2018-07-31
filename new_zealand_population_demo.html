@@ -4,7 +4,7 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-  body {font-family: 'Helvetica', sans-serif; font-size: 16px; line-height: 1.2}
+  body {font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 16px; line-height: 1.2}
   table {font-family: 'Georgia', serif;}
   th {padding-right: 1em;}
   td {text-align: right; padding-right: 1em;}
@@ -14,8 +14,8 @@
 </head>
 <body>
 
-  <script src="Olympus@0.0.1.js"></script>
-  <script src="Utility@0.0.1.js"></script>
+  <script src="Olympus@0.0.2.js"></script>
+  <script src="Utility@0.0.2.js"></script>
 
   <script>
 
@@ -34,30 +34,41 @@
         Sex: row['Sex'],
         Ethnicity: e.get(row['ETHNICGROUP']),
         Year: row['YEAR'],
-        Value: row['Value']
+        Value: row['Value'],
+        WeightedAge: row['Value']*a
       }
     }
 
     pivot1 = function(){
         q.dimension([['Age Group'],['Year','Sex']]);
-        document.querySelector('#anchor').innerHTML='';
         q.table({id: 'anchor', column_headers: false, row_totals: false});
     }
 
     pivot2 = function() {
       q.dimension([['Ethnicity','Sex'],['Year']]);
-      document.querySelector('#anchor').innerHTML='';
       q.table({id: 'anchor', column_headers: false, row_totals: false});
     }
 
-    load_pivot = function(){
-      if (req.readyState === XMLHttpRequest.DONE && (req.status === 200 || req.status === 0)) {
-        p = new Oj.DataFrame(req.response);
-        Oj.log('Loaded');
-        q = Oj.pivot(p.map(f1), {'Population': Oj.sum('Value')});
-        // draw the first table by default
-        pivot1();
-      }
+    pivot3 = function() {
+      r = Oj.pivot(p.map(f1), {Population: Oj.sum('Value'), WeightedAge: Oj.sum('WeightedAge')});
+      r.dimension([['Ethnicity','Sex'],['Year']]);
+      r.ratio((row) => {return {'Mean Age': row['WeightedAge']/row['Population']}});
+      r.table({
+        id: 'anchor',
+        columns: ['Mean Age'],
+        formats: {'Mean Age': Oj.format(1)},
+        column_headers: false,
+        row_totals: false,
+        item_names: true
+      })
+    }
+
+    load_pivot = function(json){
+      p = new Oj.DataFrame(json);
+      Oj.log('Loaded');
+      q = Oj.pivot(p.map(f1), {Population: Oj.sum('Value')});
+      // draw the first table by default
+      pivot1();
     }
 
   </script>
@@ -71,6 +82,8 @@
       <label for='age-sex'>Age &amp; Sex</label>
       <input type='radio' id='ethnicity-sex' name='table' value='pivot2'>
       <label for='ethnicity-sex'>Ethnicity &amp; Sex</label>
+      <input type='radio' id='average-age' name='table' value='pivot3'>
+      <label for='average-age'>Mean Age by Ethnicity &amp; Sex</label>
     </div>
   </form>
 
@@ -141,19 +154,11 @@
     (e.g. S3 pages, or as in this case GitHub pages).  The client-side approach
     also lends itself to single page applications and progressive web apps.
 
-
-
   <script>
-
-    req = new XMLHttpRequest();
-    req.onreadystatechange = load_pivot;
-    req.responseType = 'json';
-    req.open('GET', 'population.json', true);
-    req.send();
-
+    fetch('population.json').then(response => response.json()).then(load_pivot);
     document.form.table[0].onclick = pivot1;
     document.form.table[1].onclick = pivot2;
-
+    document.form.table[2].onclick = pivot3;
   </script>
 
 </body>
