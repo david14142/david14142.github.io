@@ -13,20 +13,37 @@
     max-width: 50em;
     color: #333333;
     background-color: #fafafa}
-  p {text-align: justify;}
-  table {font-family: 'Georgia', serif; border-collapse: collapse;}
+  p {text-align: justify}
+  a {text-decoration: none}
+  table {font-family: 'Georgia', serif; border-collapse: collapse}
   th {padding-right: 1em;}
   td {text-align: right; padding-right: 1em;}
   td.st {border-right: solid thin #dddddd}
   tr.st {border-bottom: solid thin #dddddd}
   code {color: #003153}
   h1, h2, h3 {font-weight: 300;}
+
+  .hidden {visibility: hidden; height: 0}
+  .visible {visibility: inherit; height: auto}
+  .select { background: #dddddd }
+  .deselect { background: inherit }
+
+  p.tab-group {text-align: center; line-height: 2}
+  a.tab {
+    border: solid thin #dddddd;
+    border-radius: 6px;
+    color: inherit;
+    padding: 4px 10px;
+    margin-right: 2px;
+    text-decoration: none; }
+  a.tab:hover { background: #dddddd; }
+
   </style>
 </head>
 <body>
 
-  <script src="Olympus@0.0.3.js"></script>
-  <script src="Utility@0.0.3.js"></script>
+  <script src="Olympus.js"></script>
+  <script src="Utility.js"></script>
 
   <script>
 
@@ -85,7 +102,7 @@
       p = new Oj.DataFrame(json);
       Oj.log('Loaded');
       q = Oj.pivot(p.map(f1), {Population: Oj.sum('Value')});
-      // draw the first table by default
+      //draw the first table by default
       pivot1();
     }
 
@@ -114,28 +131,29 @@
     });
   </pre>
 
-  <p>A very small (< 40kb uncompressed, with no dependencies)
+  <p>A very small (&lt; 40kb uncompressed, with no dependencies)
     <a href='https://github.com/david14142/Olympus'>JavaScript library</a>
     handles data cleaning, summarisation (including totals), cross-tabulation
     and translation into HTML.</p>
 
-  <h1>Example</h1>
+  <h1>Examples</h1>
 
   <h2 style='text-align: center'>New Zealand Estimated Resident Population</h2>
   <!-- use this to write to the document -->
-  <div id='anchor' style='overflow-x: auto'></div>
+  <div class='anchor' id='anchor' style='overflow-x: auto'></div>
   <p><i>Source: Statistics New Zealand</i></p>
 
   <form name='form'>
+    <p>Select one of the options below to re-calculate:</p>
     <div>
       <input type='radio' id='age-sex' name='table' value='pivot1' checked>
       <label for='age-sex'>Age &amp; Sex</label>
       <input type='radio' id='ethnicity-sex' name='table' value='pivot2'>
-      <label for='ethnicity-sex'>Ethnicity &amp; Sex</label><br>
+      <label for='ethnicity-sex'>Ethnicity &amp; Sex</label>
       <input type='radio' id='average-age' name='table' value='pivot3'>
-      <label for='average-age'>Mean Age by Ethnicity &amp; Sex</label>
+      <label for='average-age'>Mean Age by Ethnicity &amp; Sex</label><br>
       <input type='radio' id='paged' name='table' value='pivot3'>
-      <label for='Paged'>Ethnicity, Age Group, Year &amp; Sex (Paged)</label>
+      <label for='paged'>Ethnicity, Age Group, Year &amp; Sex (3D &ndash; Tabbed)</label>
     </div>
   </form>
 

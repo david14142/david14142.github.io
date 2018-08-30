@@ -118,16 +118,15 @@
       }
     }
 
-    let div = Oj.getElementById(options.id);
-    div.e.innerHTML='';
-    let table;
-    let head;
-    let body;
-    let hrows = [];
-    let hnames = [];
-    let leaf_total = 0;
-    let h = [];
-    let row;
+    let anchor = Oj.getElementById(options.id);
+    anchor.e.innerHTML='';
+    let div;
+    // 2d tables get written directly to the anchor;
+    if (pivot.dimensions.length === 2) div = anchor;
+    let table, head, body, row;
+    let hrows = [], hnames = [], h = [];
+    let prows = []; // page totals
+    let leaf_total = 0;  
 
     let d1 = new Oj.Interface(dim+1);
     d1.interior = function(crossing, key, value) {
@@ -146,7 +145,8 @@
     d0.follow = d1;
 
     d0.init = function() {
-      table = div.push('table');
+      //table = div.push('table');
+      table = new Oj.Chain(Oj.create('table'))
       // add a header to the table ;
       head = table.push('thead');
       // table body ;
@@ -252,13 +252,13 @@
             if (group.length === pivot.dimensions[dim+1].length) {
               if (key === SUBTOTAL) {
                 for (let e in options.columns) {
-                  name = options.columns[e];
+                  let name = options.columns[e];
                   t.push('td', {class: 'st'}, options.formats[name](value.row[name]));
                 }
               } else {
                 let i = pivot.margins[dim+1].indices['pivot-order'].find(group);
                 for (let e in options.columns) {
-                  name = options.columns[e];
+                  let name = options.columns[e];
                   t.push('td', '', options.formats[name](pivot.margins[dim+1].data[name][i] ));
                 }
               }
@@ -272,14 +272,20 @@
             t.push('td', '', options.formats[name](pivot.total[name]));
           }
         }
+      } else if (options.column_totals && pivot.dimensions.length === 3) {
+        // placeholder for a total row
+        let t = body.push('tr');
+        prows.push(t);
+        t.push('th', {colspan: pivot.dimensions[dim].length}, 'Total');
       }
+      div.link(table);
     }
 
     d0.end = function(group, leaves) {
       if (options.row_totals && group.length == pivot.dimensions[dim].length) {
         let i = pivot.margins[dim].indices['pivot-order'].find(group);
         for (let e in options.columns) {
-          name = options.columns[e];
+          let name = options.columns[e];
           row.push('td', '', options.formats[name](pivot.margins[dim].data[name][i]));
         }
       }
@@ -292,20 +298,60 @@
       // 3D tables
       let tabs = new Oj.Interface(0);
       tabs.follow = d0;
-      tabs.init = function() {
-        div = div.push('div');
-      }
+
+      //let tab_group = anchor.push('ul', {class: 'tabs group'});
+      let tab_group = anchor.push('p', {class: 'tab-group'});
+      let container = anchor.push('div', {class: 'container'});
+
       tabs.begin = function(group, leaves) {
-        div.push('h3', {style: 'text-align: center'}, group.toString());
+        let id = 'oj-'+uuidv4();
+        let selector = '#'+id;
+        let a = tab_group.push('a', {class: 'tab deselect'}, group.toString());
+        a.e.onclick = function(){
+          toggle('.visible', 'visible', 'hidden');
+          toggle(selector, 'hidden', 'visible');
+          toggle('.select', 'select', 'deselect');
+          this.classList.remove('deselect');
+          this.classList.add('select');
+        }
+        div = container.push('div', {class: 'hidden', id: id, style: 'overflow-x: auto'});
+        //div.push('h3', {style: 'text-align: center'}, group.toString());
       }
-      tabs.end = function(group, leaves) {
-        console.log(group);
-        
+
+      tabs.final = function() {
+        // make the first tab visible
+        let c = document.querySelector('.hidden').classList
+        c.remove('hidden');
+        c.add('visible');
+        let a = document.querySelector('.deselect').classList
+        a.remove('deselect');
+        a.add('select');
+        // page totals
+        let p=-1;
+        pivot.sort(pivot.page_total.indices['pivot-order'].root,
+          (group, key, value) => {
+            if (group.length === pivot.dimensions[0].length + pivot.dimensions[2].length) {
+              if (key === SUBTOTAL) {
+                for (let e in options.columns) {
+                  let name = options.columns[e];
+                  prows[p].push('td', {class: 'st'}, options.formats[name](value.row[name]));
+                }
+              } else {
+                //let i = pivot.margins[dim+1].indices['pivot-order'].find(group);
+                for (let e in options.columns) {
+                  let name = options.columns[e];
+                  prows[p].push('td', '', options.formats[name](pivot.page_total.data[name][value[0]] ));
+                }
+              }
+            }
+            if (group.length === pivot.dimensions[0].length) {
+              p++;
+            }
+          }
+        );
       }
       this.navigate(tabs);
     }
-
-
   }
 
   // https://stackoverflow.com/questions/149055/
@@ -366,6 +412,23 @@
       if(typeof text !== 'undefined' && typeof text.nodeType !== 'undefined' && text.nodeType === 1 ) e.appendChild(text);
       return new Oj.Chain(e);
     }
+  }
+
+  // toggles class values for any elements matching the selector
+  toggle = function(selector, remove, add) {
+      let list = document.querySelectorAll(selector);
+      list.forEach(e => {
+          e.classList.add(add);
+          e.classList.remove(remove);
+        });
+  }
+
+  // https://stackoverflow.com/questions/105034/
+  let uuidv4 = function() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+    });
   }
 
   Oj.Chain.prototype.link = function(chain) {

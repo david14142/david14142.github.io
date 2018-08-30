@@ -635,6 +635,9 @@ const SUBTOTAL = Symbol('oj-subtotal');
       this.page_total = this.aggregate(d, this.expression);
       this.page_total.reorder('pivot-order', d);
       this.page_grand_total = this.margins[0];
+    } else {
+      this.page_total = undefined;
+      this.page_grand_total = undefined;
     }
     this.subtotals = [];
     this.subtotal_dim = [];
@@ -673,16 +676,26 @@ const SUBTOTAL = Symbol('oj-subtotal');
       this.subtotal_dim.push(subtotal);
     }
 
-    // now add to the subtotals to the margins
+    // now add to the subtotals to the margins and page_totals
     var n = this.subtotals.length-1;
     for (let m=0; m < this.margins.length; m++) {
       let columns = intersect(this.dimensions[m], subtotal);
       if (columns.length > 0) {
         intersection = this.aggregate(columns, this.expression);
         intersection.reorder('subtotal-order', columns);
-        //console.log(intersection);
         addend(this.margins[m].indices['pivot-order'].root);
         this.leaf(this.margins[m].indices['pivot-order'].root);
+
+        if (typeof this.page_total != 'undefined') {
+          let d = this.dimensions[0].concat(this.dimensions[2]);
+          let columns = intersect(d, subtotal);
+          if (columns.length > 0) {
+            intersection = this.aggregate(columns, this.expression);
+            intersection.reorder('subtotal-order', columns);
+            addend(this.page_total.indices['pivot-order'].root);
+            this.leaf(this.page_total.indices['pivot-order'].root);
+          }
+        }
       }
     }
   }
