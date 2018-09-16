@@ -27,9 +27,11 @@
   // todo: print something for nulls
   Oj.DataFrame.prototype.print = function(rows) {
     if (typeof rows == 'undefined' || rows === 0) rows = this.length;
+    let x=1;
     console.log(this.columns.join('\t'));
     for(let i of this) {
       console.log(this.getRow(i).join('\t'));
+      if (++x > rows) break;
     }
   }
 
@@ -50,7 +52,7 @@
   Oj.log = function(string) {
     let n = new Date();
     if (arguments.length === 1) {
-      console.log(n + '> ' + string );
+      console.log('\u{1F34A}' + n + '> ' + string );
     } else {
       for (let i=0; i < arguments.length; i++) {
         let a;
@@ -63,11 +65,12 @@
         }
         var s = (typeof s == 'undefined' ? '' : s + '\t') + a;
       }
-      console.log(n + '> ' + s);
+      console.log('\u{1F34A}' + n + '> ' + s);
     }
   }
 
   // dummy interface for logging callbacks
+  // todo: handle objects as arguments
   Oj.Echo = class extends Oj.Interface {
     constructor(dimension) {
       super(dimension);
@@ -78,13 +81,6 @@
   Oj.Echo.prototype.interior = function(...args) { Oj.log.apply(null, ['interior: '].concat(args)) };
   Oj.Echo.prototype.end = function(...args) { Oj.log.apply(null, ['end: '].concat(args)) };
   Oj.Echo.prototype.final = function(...args) { Oj.log.apply(null, ['final: '].concat(args)) };
-
-  // interface for the last dimension (columns-interior) of a table
-  Oj.TableColumns = class extends Oj.Interface {
-    constructor(dimension) {
-      super(dimension);
-    }
-  }
 
   Oj.PivotTable.prototype.table = function(options) {
     const pivot = this;
@@ -126,7 +122,7 @@
     let table, head, body, row;
     let hrows = [], hnames = [], h = [];
     let prows = []; // page totals
-    let leaf_total = 0;  
+    let leaf_total = 0;
 
     let d1 = new Oj.Interface(dim+1);
     d1.interior = function(crossing, key, value) {
@@ -352,6 +348,79 @@
       }
       this.navigate(tabs);
     }
+  }
+
+  Oj.PivotTable.prototype.exportTSV = function(id, filename, columns, message) {
+
+    // set up a chain of handlers
+    let handler = [], data = '', row;
+    let pivot = this;
+    let row_depth = 0;
+    filename = filename || 'data.tsv';
+    message = message || 'Click to download in TSV format'
+    columns = columns || Object.keys(this.expression);
+
+    for (let d=0; d < this.dimensions.length -1; d++) {
+      row_depth += this.dimensions[d].length;
+    }
+    for (let i=0; i < this.dimensions.length; i++) {
+      let h = new Oj.Interface(i);
+      handler.push(h);
+      if (i > 0) handler[i-1].follow = h;
+      // export rows from the next to innermost dimension
+      if (i == this.dimensions.length-2) {
+        h.begin = function(group, leaves) {
+          if (group.length === row_depth) {
+            row = [];
+            for (g=0; g < group.length; g++) {
+              if (group[g] === SUBTOTAL) {
+                row.push('Total')
+              } else {
+                row.push(group[g]);
+              }
+            }
+          }
+        }
+      }
+      // only export columns from the innermost dimension
+      if (i === this.dimensions.length-1) {
+        h.interior = function(crossing, key, value) {
+          for (let e in columns) {
+            row.push(value[columns[e]]);
+          }
+        }
+        h.final = function() {
+          data += row.join('\t') + '\n';
+        }
+      }
+
+    }
+    row = [];
+    handler[0].init = function() {
+      for (let d=0; d < pivot.dimensions.length -1; d++) {
+        // column names
+        row.push(pivot.dimensions[d].join('\t'));
+      }
+      pivot.sort(pivot.margins[pivot.dimensions.length-1].indices['pivot-order'].root,
+        (group, key, value, leaves) => {
+          if (group[group.length-1] === SUBTOTAL) group[group.length-1] = 'Total';
+          if (value[Symbol.toStringTag] != 'Map') {
+            for (c=0; c < columns.length; c++) {
+              row.push(group.join(' : ') + ' : ' + columns[c]);
+            }
+          }
+        }
+      );
+      data += row.join('\t') + '\n';
+    }
+
+    this.navigate(handler[0]);
+    let anchor = Oj.getElementById(id);
+    anchor.e.innerHTML='';
+    let blob = new Blob([data], {type: 'text/tab-separated-values'});
+    let a = new Oj.Chain(Oj.create('a', {href: window.URL.createObjectURL(blob), download: filename}, message));
+    anchor.link(a);
+
   }
 
   // https://stackoverflow.com/questions/149055/
